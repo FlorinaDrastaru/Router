@@ -1,0 +1,73 @@
+DRASTARU FLORINA CRISTINA 325CA
+
+TEMA1 PROTOCOALE DE COMUNICATII
+
+Structura tema:
+    - router.c;
+    - functions.h;
+    - functions.c;
+    - routing_table.h;
+    - arp_table.h;
+
+Mentionez faptul ca am incercat sa creez cate un fisier de tip ".c" pentru 
+"routing_table.h" si "arp_table.h", asa cum este normal, insa mi se 
+modifica punctajul inexplicabil(imi picau majoritatea testelor).
+
+Cerinta1 - Parsarea tabelei de rutare
+
+Am creat structura "route_table_entry" pentru un entry din tabela de rutare, in care 
+salvez prefixul, next-hop-ul, masca si interfata.
+
+Pentru a parsa tabela, folosesc functiile:
+    
+    1. match_strings_to_entry
+        - functie auxiliara pentru functia de parsare, in care convertesc fiecare 
+          string care reprezinta o adresa de tip IPv4 intr-o adresa numerica
+        - adresele obtinute si valoarea interfetei le adaug in entry-ul potrivit 
+          din tabela de rutare
+    2. void parse_table() 
+        - citesc cate o linie formata din 4 stringuri din fisierul "rtable.txt" 
+          si aplic functia auxiliara "match_strings_to_entry"
+
+
+Cerintaa2 - Protocolul ARP
+
+Am folosit tabela statica pusa la dispozitie. Am creat structura "arp_entry" pentru
+o intrare din tabela ARP, in care salvez adresa ip si mac-ul.
+
+Pentru a parsa tabela folosesc functia "void parse_arp_table()", similara celei de parsare
+a tabelei de rutare.
+    - citesc cate o linie formata din 2 stringuri din fisierul "arp_table.txt";
+    - convertesc stringurile in tipurile potrivite(adresa ip si adresa MAC)
+
+Cerinta3 - Procesul de dirijare
+    In router.c:
+        - parsez tabela de rutare si o sortez(in nlogn cu qsort), parsez tabela ARP;
+        - verific checksum-ul, TTL si ether_type-ul;
+        - caut cea mai buna ruta, apoi caut intrarea arp;
+        - updatez TTL si checksum, sursa este adresa actuala, iar destinatia o setez 
+          in functie de adresa MAC a intrarii arp gasite;
+        - trimit pachetul pe interfata celei mai bune rute.
+
+    Am realizat cautarea in tabela de rutare in logn, folosind cautarea binara:
+        - functia struct route_table_entry *get_best_route (struct route_table_entry *table, 
+                                                int low, int high, uint32_t dest_ip, int n)
+
+Cerinta4 - Protocolul ICMP
+    Trimit un nou pachet(o eroare - pentru TTL sau HostUnreachable):
+        - completez headerele de ethernet, de iphdr, de ICMP(difera type-ul in functie de eroare);
+        - pentru headerele ethernet si iphdr, le completez astfel incat noua sursa 
+        este vechea destinatie, iar noua destinatie este vechea sursa pentru ca trimit 
+        noul pachet pe acelasi drum pe care a venit cel vechi;
+        - trimit pachetul pe interfata pe care a venit vechiul pachet.
+        
+
+REFERINTE
+    - rezolvarile realizate la laboratoarele 4 si 5;
+    - preluarea functiei "uint16_t checksum(void *vdata, size_t length)" din resursele din lab4.
+
+EVALUARE PERSONALA
+
+Am observat faptul ca pe vmchecker difera punctajul pe diferite submisii, insa pe local 
+obtin 95 de puncte. Am realizat cerintele 1, 2(tabela statica), 3 si 4(partial), deci 
+dupa modelul de punctaj din enunt consider ca am rezolvat tema de 70 de puncte(aproximativ).
